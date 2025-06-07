@@ -1,0 +1,86 @@
+version: '3.8'
+
+services:
+  # Frontend service
+  frontend:
+    build: 
+      context: .
+      dockerfile: Dockerfile.frontend
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    environment:
+      - VITE_API_URL=http://localhost:8000
+    depends_on:
+      - backend
+
+  # Backend service  
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app
+      - ocean_uploads:/app/uploads
+      - ocean_data:/app/data
+    environment:
+      - DATABASE_HOST=mysql
+      - DATABASE_PORT=3306
+      - DATABASE_USER=root
+      - DATABASE_PASSWORD=iocas6760root
+      - DATABASE_NAME=ocean_platform
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    depends_on:
+      - mysql
+      - redis
+    restart: unless-stopped
+
+  # MySQL database (using existing container)
+  mysql:
+    image: mysql:8.0
+    container_name: oceanenv_mysql_simple
+    ports:
+      - "3306:3306"
+    environment:
+      - MYSQL_ROOT_PASSWORD=iocas6760root
+      - MYSQL_DATABASE=ocean_platform
+    volumes:
+      - mysql_data:/var/lib/mysql
+    restart: unless-stopped
+
+  # Redis cache
+  redis:
+    image: redis:7-alpine
+    container_name: oceanenv-redis
+    ports:
+      - "6379:6379"
+    restart: unless-stopped
+
+  # phpMyAdmin for database management
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin:latest
+    container_name: oceanenv_phpmyadmin_simple
+    ports:
+      - "8081:80"
+    environment:
+      - PMA_HOST=mysql
+      - PMA_PORT=3306
+      - PMA_USER=root
+      - PMA_PASSWORD=iocas6760root
+    depends_on:
+      - mysql
+    restart: unless-stopped
+
+volumes:
+  mysql_data:
+  ocean_uploads:
+  ocean_data:
+
+networks:
+  default:
+    name: ocean_platform_network
