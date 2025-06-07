@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from app.api.v1.endpoints import data_download, data_conversion, algorithm_management
+from app.api.v1.endpoints import data_download, data_conversion, algorithm_management, websocket
 
 api_router = APIRouter()
 
@@ -19,4 +19,10 @@ api_router.include_router(
     algorithm_management.router,
     prefix="/algorithms",
     tags=["algorithms"]
+)
+
+api_router.include_router(
+    websocket.router,
+    prefix="/ws",
+    tags=["websocket"]
 )

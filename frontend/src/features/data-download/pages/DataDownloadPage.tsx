@@ -6,10 +6,15 @@ import { DownloadTasksList } from '../components/DownloadTasksList'
 import { NewTaskModal } from '../components/NewTaskModal'
 import { SchedulerStatus } from '../components/SchedulerStatus'
 import { useDownloadTasks } from '../hooks/useDownloadTasks'
+import { useWebSocket } from '@/hooks/useWebSocket'
+import { WebSocketStatus } from '@/components/WebSocketStatus'
 
 const DataDownloadPage: React.FC = () => {
   const [showNewTaskModal, setShowNewTaskModal] = useState(false)
   const [showDataSourceManagement, setShowDataSourceManagement] = useState(false)
+  
+  // Initialize WebSocket connection
+  const { connection } = useWebSocket()
   const { 
     tasks, 
     loading, 
@@ -19,6 +24,7 @@ const DataDownloadPage: React.FC = () => {
     pauseTask, 
     resumeTask, 
     cancelTask,
+    deleteTask,
     batchStartTasks,
     batchPauseTasks,
     batchCancelTasks,
@@ -60,7 +66,13 @@ const DataDownloadPage: React.FC = () => {
       {/* 页面头部 */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">数据下载管理</h1>
+          <div className="flex items-center space-x-4">
+            <h1 className="text-2xl font-bold text-gray-900">数据下载管理</h1>
+            <WebSocketStatus
+              isConnected={connection.isConnected}
+              reconnectAttempts={connection.reconnectAttempts}
+            />
+          </div>
           <p className="text-gray-600 mt-1">国际共享海洋环境数据批量下载</p>
         </div>
         <button
@@ -87,6 +99,7 @@ const DataDownloadPage: React.FC = () => {
         onPauseTask={pauseTask}
         onResumeTask={resumeTask}
         onCancelTask={cancelTask}
+        onDeleteTask={deleteTask}
         onBatchStart={batchStartTasks}
         onBatchPause={batchPauseTasks}
         onBatchCancel={batchCancelTasks}

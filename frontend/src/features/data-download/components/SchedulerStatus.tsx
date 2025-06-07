@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { Play, Pause, Activity, Clock, Users } from 'lucide-react'
 import { downloadService } from '../services/downloadService'
+import { useSchedulerStatus } from '@/hooks/useWebSocket'
 
 interface SchedulerStatusData {
   running_tasks: number
@@ -12,19 +13,11 @@ interface SchedulerStatusData {
 }
 
 export const SchedulerStatus: React.FC = () => {
-  const [status, setStatus] = useState<SchedulerStatusData | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-
-  const fetchStatus = async () => {
-    try {
-      const data = await downloadService.getSchedulerStatus()
-      setStatus(data)
-      setError(null)
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to fetch scheduler status')
-    }
-  }
+  
+  // Use WebSocket for real-time status updates
+  const status = useSchedulerStatus()
 
   const toggleScheduler = async () => {
     if (!status) return
@@ -36,19 +29,13 @@ export const SchedulerStatus: React.FC = () => {
       } else {
         await downloadService.startScheduler()
       }
-      await fetchStatus()
+      setError(null)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to toggle scheduler')
     } finally {
       setLoading(false)
     }
   }
-
-  useEffect(() => {
-    fetchStatus()
-    const interval = setInterval(fetchStatus, 10000) // Update every 10 seconds
-    return () => clearInterval(interval)
-  }, [])
 
   if (!status) {
     return (

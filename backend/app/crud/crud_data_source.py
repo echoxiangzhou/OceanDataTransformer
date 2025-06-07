@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import List, Optional, Union, Dict, Any
 from sqlalchemy.orm import Session
 from app.models.data_source import DataSource
 from app.schemas.data_source import DataSourceCreate, DataSourceUpdate
@@ -28,8 +28,12 @@ class CRUDDataSource:
         db.refresh(db_obj)
         return db_obj
 
-    def update(self, db: Session, *, db_obj: DataSource, obj_in: DataSourceUpdate) -> DataSource:
-        update_data = obj_in.dict(exclude_unset=True)
+    def update(self, db: Session, *, db_obj: DataSource, obj_in: Union[DataSourceUpdate, Dict[str, Any]]) -> DataSource:
+        if isinstance(obj_in, dict):
+            update_data = obj_in
+        else:
+            update_data = obj_in.model_dump(exclude_unset=True)
+        
         for field, value in update_data.items():
             setattr(db_obj, field, value)
         db.commit()

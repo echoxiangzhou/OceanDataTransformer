@@ -65,9 +65,19 @@ export function useDownloadTasks() {
   const cancelTask = useCallback(async (id: number) => {
     try {
       await downloadService.cancelDownloadTask(id)
-      setTasks(prev => prev.filter(task => task.id !== id))
+      await fetchTasks() // Refresh tasks to get updated status
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to cancel task')
+      throw err
+    }
+  }, [fetchTasks])
+
+  const deleteTask = useCallback(async (id: number) => {
+    try {
+      await downloadService.deleteDownloadTask(id)
+      setTasks(prev => prev.filter(task => task.id !== id))
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to delete task')
       throw err
     }
   }, [])
@@ -126,6 +136,7 @@ export function useDownloadTasks() {
     pauseTask,
     resumeTask,
     cancelTask,
+    deleteTask,
     batchStartTasks,
     batchPauseTasks,
     batchCancelTasks,

@@ -73,11 +73,22 @@ export const DataSourceForm: React.FC<DataSourceFormProps> = ({
     if (!validateForm()) return
 
     setLoading(true)
+    setErrors({}) // Clear previous errors
+    
     try {
       await onSubmit(formData)
       onClose()
-    } catch (error) {
+    } catch (error: any) {
       console.error('Submit error:', error)
+      
+      // Handle different types of errors
+      if (error.message && error.message.includes('already exists')) {
+        setErrors({ name: '该数据源名称已存在' })
+      } else if (error.message && error.message.includes('validation')) {
+        setErrors({ general: '数据验证失败，请检查输入内容' })
+      } else {
+        setErrors({ general: '添加数据源失败，请稍后重试' })
+      }
     } finally {
       setLoading(false)
     }
@@ -151,6 +162,9 @@ export const DataSourceForm: React.FC<DataSourceFormProps> = ({
                     placeholder="https://example.com/data"
                     required
                   />
+                  <p className="mt-1 text-xs text-gray-500">
+                    支持目录URL（下载多个文件）或单文件URL（如：.nc文件）
+                  </p>
                   {errors.url && (
                     <p className="mt-1 text-sm text-red-600">{errors.url}</p>
                   )}
@@ -244,6 +258,13 @@ export const DataSourceForm: React.FC<DataSourceFormProps> = ({
                   </div>
                 )}
               </div>
+              
+              {/* General error message */}
+              {errors.general && (
+                <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+                  <p className="text-sm text-red-600">{errors.general}</p>
+                </div>
+              )}
             </div>
 
             <div className="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">

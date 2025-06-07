@@ -26,7 +26,7 @@ class DataSourceUpdate(BaseModel):
 class DataSourceResponse(DataSourceBase):
     id: int
     created_at: datetime
-    updated_at: datetime
+    updated_at: Optional[datetime] = None
     is_active: bool = True
     
     class Config:

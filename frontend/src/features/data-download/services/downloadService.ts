@@ -50,6 +50,10 @@ export const downloadService = {
   },
 
   async cancelDownloadTask(id: number): Promise<MessageResponse> {
+    return api.post<MessageResponse>(`/data-download/tasks/${id}/cancel`)
+  },
+
+  async deleteDownloadTask(id: number): Promise<MessageResponse> {
     return api.delete<MessageResponse>(`/data-download/tasks/${id}`)
   },
 

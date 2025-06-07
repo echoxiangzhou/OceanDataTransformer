@@ -149,7 +149,7 @@ async def resume_download_task(task_id: int, db: Session = Depends(get_db)):
     
     return {"message": f"Download task {task_id} resumed"}
 
-@router.delete("/tasks/{task_id}", response_model=MessageResponse)
+@router.post("/tasks/{task_id}/cancel", response_model=MessageResponse)
 async def cancel_download_task(task_id: int, db: Session = Depends(get_db)):
     """取消下载任务"""
     task = crud_download_task.get(db, id=task_id)
@@ -161,6 +161,21 @@ async def cancel_download_task(task_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=500, detail="Failed to cancel download task")
     
     return {"message": f"Download task {task_id} cancelled"}
+
+@router.delete("/tasks/{task_id}", response_model=MessageResponse)
+async def delete_download_task(task_id: int, db: Session = Depends(get_db)):
+    """删除下载任务"""
+    task = crud_download_task.get(db, id=task_id)
+    if not task:
+        raise HTTPException(status_code=404, detail="Download task not found")
+    
+    # 如果任务正在运行，先取消它
+    if task.status == "running":
+        await download_service.cancel_download(db, task_id)
+    
+    # 删除任务记录
+    crud_download_task.remove(db, id=task_id)
+    return {"message": f"Download task {task_id} deleted successfully"}
 
 # Batch operations
 @router.post("/tasks/batch/start", response_model=MessageResponse)

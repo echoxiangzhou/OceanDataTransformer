@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import List, Optional, Union, Dict, Any
 from sqlalchemy.orm import Session
 from sqlalchemy import and_
 from app.models.download_task import DownloadTask
@@ -43,8 +43,12 @@ class CRUDDownloadTask:
         db.refresh(db_obj)
         return db_obj
 
-    def update(self, db: Session, *, db_obj: DownloadTask, obj_in: DownloadTaskUpdate) -> DownloadTask:
-        update_data = obj_in.dict(exclude_unset=True)
+    def update(self, db: Session, *, db_obj: DownloadTask, obj_in: Union[DownloadTaskUpdate, Dict[str, Any]]) -> DownloadTask:
+        if isinstance(obj_in, dict):
+            update_data = obj_in
+        else:
+            update_data = obj_in.model_dump(exclude_unset=True)
+        
         for field, value in update_data.items():
             setattr(db_obj, field, value)
         db.commit()
