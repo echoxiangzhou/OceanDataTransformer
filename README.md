@@ -35,7 +35,7 @@
 - **图标库**: Lucide React
 - **构建工具**: Vite
 - **路由**: React Router
-- **UI组件**: Ant Design
+- **UI组件**: Shadcn/ui
 
 ## 📦 安装与运行
 
@@ -116,25 +116,3 @@ src/
 - 响应式断点设置
 - 自定义组件样式
 
-## 🤝 贡献指南
-
-1. Fork 项目
-2. 创建功能分支 (`git checkout -b feature/AmazingFeature`)
-3. 提交更改 (`git commit -m 'Add some AmazingFeature'`)
-4. 推送到分支 (`git push origin feature/AmazingFeature`)
-5. 创建 Pull Request
-
-## 📄 许可证
-
-本项目采用 MIT 许可证 - 查看 [LICENSE](LICENSE) 文件了解详情
-
-## 📧 联系我们
-
-如有问题或建议，请通过以下方式联系：
-
-- 项目Issues: [GitHub Issues](../../issues)
-- 邮箱: ocean-platform@example.com
-
----
-
-⭐ 如果这个项目对您有帮助，请给我们一个星标！ 
