@@ -22,6 +22,8 @@ class Settings(BaseSettings):
     UPLOAD_DIR: str = "./uploads"
     NETCDF_DIR: str = "./data/netcdf"
     DOWNLOAD_DIR: str = "./data/downloads"
+    ALGORITHM_DIR: str = "./data/algorithms"
+    CONTAINER_WORK_DIR: str = "./data/container_work"
     
     # Docker
     DOCKER_SOCKET: str = "unix:///var/run/docker.sock"
@@ -44,7 +46,9 @@ class Settings(BaseSettings):
         directories = [
             Path(self.UPLOAD_DIR),
             Path(self.NETCDF_DIR),
-            Path(self.DOWNLOAD_DIR)
+            Path(self.DOWNLOAD_DIR),
+            Path(self.ALGORITHM_DIR),
+            Path(self.CONTAINER_WORK_DIR)
         ]
         
         for directory in directories:

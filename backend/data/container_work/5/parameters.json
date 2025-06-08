@@ -1,0 +1,8 @@
+{
+  "parameters": {
+    "variable_type": "temperature",
+    "depth": 10
+  },
+  "output_format": "default",
+  "task_id": 5
+}

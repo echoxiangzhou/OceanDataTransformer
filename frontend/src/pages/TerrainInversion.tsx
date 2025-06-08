@@ -11,8 +11,17 @@ import {
   TrendingUp,
   Activity,
   Layers,
-  Map
+  Map,
+  FileText,
+  Eye,
+  Trash2,
+  RefreshCw,
+  AlertCircle,
+  CheckCircle,
+  X
 } from 'lucide-react'
+import TerrainDataUpload from '../components/TerrainDataUpload'
+import TerrainVisualization from '../components/TerrainVisualization'
 
 const TerrainInversion: React.FC = () => {
   const [modelConfig, setModelConfig] = useState({
@@ -29,6 +38,13 @@ const TerrainInversion: React.FC = () => {
     depthRange: '0-6000m',
     filterType: 'gaussian'
   })
+
+  const [showUploadModal, setShowUploadModal] = useState(false)
+  const [uploadedData, setUploadedData] = useState<any[]>([])
+  const [selectedModel, setSelectedModel] = useState<number | null>(null)
+  const [showResults, setShowResults] = useState(false)
+  const [showVisualization, setShowVisualization] = useState(false)
+  const [completedInversion, setCompletedInversion] = useState<any>(null)
 
   const models = [
     {
@@ -117,6 +133,83 @@ const TerrainInversion: React.FC = () => {
     }
   }
 
+  // 处理数据上传
+  const handleDataUpload = (data: any) => {
+    setUploadedData(prev => [...prev, data])
+    console.log('数据已上传:', data)
+  }
+
+  // 开始反演
+  const handleStartInversion = () => {
+    if (uploadedData.length === 0) {
+      alert('请先上传数据文件')
+      return
+    }
+    if (selectedModel === null) {
+      alert('请选择一个深度学习模型')
+      return
+    }
+    
+    // 模拟开始反演
+    const selectedModelData = models.find(m => m.id === selectedModel)
+    alert(`开始使用 ${selectedModelData?.name} 进行地形反演\n数据文件: ${uploadedData[0].files.length} 个\n区域: ${uploadedData[0].region.name}`)
+    
+    // 更新任务列表
+    const newTask = {
+      id: inversionTasks.length + 1,
+      name: `${uploadedData[0].region.name}地形反演`,
+      model: selectedModelData?.name || '',
+      region: uploadedData[0].region.name,
+      progress: 0,
+      status: '处理中',
+      startTime: new Date().toLocaleString(),
+      estimatedTime: '计算中...',
+      inputData: uploadedData[0].files.map((f: any) => f.dataType).join('+'),
+      resolution: inversionConfig.resolution
+    }
+    inversionTasks.unshift(newTask)
+    
+    // 模拟反演过程完成后显示结果
+    setTimeout(() => {
+      const inversionResult = {
+        region: uploadedData[0].region.name,
+        model: selectedModelData?.name || '',
+        resolution: inversionConfig.resolution,
+        dataSource: uploadedData[0].files.map((f: any) => f.dataType).join(', '),
+        timestamp: new Date().toISOString(),
+        statistics: {
+          minDepth: -5847,
+          maxDepth: -245,
+          avgDepth: -2456,
+          totalArea: 2847,
+          accuracy: 94.2
+        }
+      }
+      setCompletedInversion(inversionResult)
+      setShowResults(true)
+      
+      // 更新任务状态为完成
+      const taskIndex = inversionTasks.findIndex(t => t.id === newTask.id)
+      if (taskIndex !== -1) {
+        inversionTasks[taskIndex].status = '已完成'
+        inversionTasks[taskIndex].progress = 100
+        inversionTasks[taskIndex].estimatedTime = '完成'
+      }
+    }, 3000) // 3秒后模拟完成
+  }
+
+  // 选择模型
+  const handleSelectModel = (modelId: number) => {
+    setSelectedModel(modelId)
+  }
+
+  // 查看可视化结果
+  const handleViewVisualization = () => {
+    if (completedInversion) {
+      setShowVisualization(true)
+    }
+  }
+
   return (
     <div className="space-y-6">
       {/* 页面头部 */}
@@ -126,11 +219,18 @@ const TerrainInversion: React.FC = () => {
           <p className="text-gray-600 mt-1">基于深度学习的海底地形重力反演和CNN/DNN算法</p>
         </div>
         <div className="flex space-x-3">
-          <button className="btn-secondary flex items-center space-x-2">
+          <button 
+            onClick={() => setShowUploadModal(true)}
+            className="btn-secondary flex items-center space-x-2"
+          >
             <Upload className="h-4 w-4" />
             <span>导入数据</span>
           </button>
-          <button className="btn-primary flex items-center space-x-2">
+          <button 
+            onClick={() => handleStartInversion()}
+            disabled={uploadedData.length === 0 || selectedModel === null}
+            className="btn-primary flex items-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
             <Play className="h-4 w-4" />
             <span>开始反演</span>
           </button>
@@ -330,8 +430,11 @@ const TerrainInversion: React.FC = () => {
               </div>
 
               <div className="mt-4 flex space-x-2">
-                <button className="flex-1 text-xs btn-secondary">
-                  {model.status === '已训练' ? '重新训练' : '开始训练'}
+                <button 
+                  onClick={() => handleSelectModel(model.id)}
+                  className={`flex-1 text-xs ${selectedModel === model.id ? 'btn-primary' : 'btn-secondary'}`}
+                >
+                  {selectedModel === model.id ? '已选择' : '选择模型'}
                 </button>
                 <button className="px-3 py-1 text-xs text-gray-500 hover:text-gray-700 border border-gray-300 rounded">
                   设置
@@ -453,6 +556,100 @@ const TerrainInversion: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* 数据上传情况 */}
+      {uploadedData.length > 0 && (
+        <div className="card">
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">已上传的数据</h2>
+          <div className="space-y-4">
+            {uploadedData.map((data, index) => (
+              <div key={index} className="border border-gray-200 rounded-lg p-4">
+                <div className="flex items-start justify-between">
+                  <div>
+                    <h3 className="font-medium text-gray-900 mb-2">{data.region.name}</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-gray-600">
+                      <div>
+                        <span className="font-medium">边界范围:</span>
+                        <p className="text-xs">
+                          {data.region.northLat}°N - {data.region.southLat}°N,
+                          {data.region.eastLon}°E - {data.region.westLon}°E
+                        </p>
+                      </div>
+                      <div>
+                        <span className="font-medium">数据文件:</span>
+                        <p className="text-xs">{data.files.length} 个文件</p>
+                      </div>
+                      <div>
+                        <span className="font-medium">坐标系统:</span>
+                        <p className="text-xs">{data.config.coordinateSystem}</p>
+                      </div>
+                    </div>
+                    <div className="mt-2 flex flex-wrap gap-2">
+                      {data.files.map((file: any, idx: number) => (
+                        <span key={idx} className="px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded">
+                          {file.name} ({file.dataType})
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => setUploadedData(prev => prev.filter((_, i) => i !== index))}
+                    className="text-red-500 hover:text-red-700"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* 反演结果展示 */}
+      {showResults && (
+        <div className="card">
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">反演结果</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="bg-gray-100 rounded-lg p-8 text-center">
+              <Mountain className="h-16 w-16 text-gray-400 mx-auto mb-4" />
+              <p className="text-gray-600">3D地形可视化</p>
+            </div>
+            <div className="bg-gray-100 rounded-lg p-8 text-center">
+              <Map className="h-16 w-16 text-gray-400 mx-auto mb-4" />
+              <p className="text-gray-600">深度分布图</p>
+            </div>
+          </div>
+          <div className="mt-6 flex justify-end space-x-3">
+            <button 
+              onClick={handleViewVisualization}
+              className="btn-secondary flex items-center space-x-2"
+            >
+              <Eye className="h-4 w-4" />
+              <span>查看可视化</span>
+            </button>
+            <button className="btn-primary flex items-center space-x-2">
+              <Download className="h-4 w-4" />
+              <span>下载结果</span>
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* 数据上传模态框 */}
+      {showUploadModal && (
+        <TerrainDataUpload
+          onClose={() => setShowUploadModal(false)}
+          onUpload={handleDataUpload}
+        />
+      )}
+
+      {/* 可视化结果模态框 */}
+      {showVisualization && completedInversion && (
+        <TerrainVisualization
+          inversionData={completedInversion}
+          onClose={() => setShowVisualization(false)}
+        />
+      )}
     </div>
   )
 }

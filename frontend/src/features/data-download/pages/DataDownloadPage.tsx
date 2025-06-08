@@ -4,7 +4,6 @@ import { DataSourcesGrid } from '../components/DataSourcesGrid'
 import { DataSourceManagement } from '../components/DataSourceManagement'
 import { DownloadTasksList } from '../components/DownloadTasksList'
 import { NewTaskModal } from '../components/NewTaskModal'
-import { SchedulerStatus } from '../components/SchedulerStatus'
 import { useDownloadTasks } from '../hooks/useDownloadTasks'
 import { useWebSocket } from '@/hooks/useWebSocket'
 import { WebSocketStatus } from '@/components/WebSocketStatus'
@@ -87,8 +86,6 @@ const DataDownloadPage: React.FC = () => {
       {/* 数据源状态 */}
       <DataSourcesGrid onManageClick={() => setShowDataSourceManagement(true)} />
 
-      {/* 调度器状态 */}
-      <SchedulerStatus />
 
       {/* 下载任务列表 */}
       <DownloadTasksList

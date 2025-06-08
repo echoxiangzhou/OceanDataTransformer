@@ -10,6 +10,8 @@ python-dotenv==1.0.0
 pydantic==2.5.0
 pydantic-settings==2.1.0
 httpx==0.25.2
+requests<2.30
+urllib3<2.0
 aiofiles==23.2.1
 aiohttp==3.9.1
 beautifulsoup4==4.12.2
@@ -21,5 +23,8 @@ netcdf4==1.6.5
 xarray==2023.11.0
 pandas==2.1.4
 numpy==1.25.2
+pillow==10.1.0
+h5py==3.10.0
+cfgrib==0.9.10.4
 pytest==7.4.3
 pytest-asyncio==0.21.1

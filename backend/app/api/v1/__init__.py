@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from app.api.v1.endpoints import data_download, data_conversion, algorithm_management, websocket
+from app.api.v1.endpoints import data_download, data_conversion, algorithms, websocket, cf_compliance, import_wizard, algorithm_management
 
 api_router = APIRouter()
 
@@ -16,9 +16,21 @@ api_router.include_router(
 )
 
 api_router.include_router(
+    import_wizard.router,
+    prefix="/import-wizard",
+    tags=["import-wizard"]
+)
+
+api_router.include_router(
+    cf_compliance.router,
+    prefix="/cf-compliance",
+    tags=["cf-compliance"]
+)
+
+api_router.include_router(
     algorithm_management.router,
     prefix="/algorithms",
-    tags=["algorithms"]
+    tags=["algorithm-management"]
 )
 
 api_router.include_router(
